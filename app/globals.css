@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+
+  /* Brand Colors — white + peach minimalist */
+  --brand-peach: #D9946A;
+  --brand-peach-dark: #C17F55;
+  --brand-peach-light: #FBE8D9;
+  --brand-border: #EEE3DA;
+  --brand-ink: #241B21;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #fff;
+  color: var(--brand-ink);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Scrollbar — peach thumb on white track */
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #fafafa;
+}
+::-webkit-scrollbar-thumb {
+  background: #D9946A99;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-peach);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Primary button — solid peach, flat minimalist radius */
+.btn-primary {
+  background: var(--brand-peach);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0.7rem 1.6rem;
+  border: none;
+  font-family: var(--font-body);
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--brand-peach-dark);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary button — same shape as primary, kept as an alias so
+   existing btn-secondary references (bulk-add, etc.) still resolve */
+.btn-secondary {
+  background: #fff;
+  color: var(--brand-ink);
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0.7rem 1.6rem;
+  border: 1px solid var(--brand-border);
+  font-family: var(--font-body);
+  transition: background 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: var(--brand-peach-light);
+  border-color: var(--brand-peach);
+}
+
+/* Outline button — ink border, flips to solid ink on hover so it reads
+   as a clear secondary action without competing with the peach accent */
+.btn-outline {
+  border: 1px solid var(--brand-ink);
+  color: var(--brand-ink);
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0.65rem 1.5rem;
+  background: #fff;
+  font-family: var(--font-body);
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+}
+.btn-outline:hover {
+  background: var(--brand-ink);
+  color: #fff;
+}
+
+/* Soft secondary button (peach-wash fill) */
+.btn-gold {
+  background: var(--brand-peach-light);
+  color: var(--brand-peach-dark);
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 0.7rem 1.6rem;
+  border: 1px solid var(--brand-border);
+  font-family: var(--font-body);
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+.btn-gold:hover {
+  background: var(--brand-border);
+}
+
+/* Section title */
+.section-title {
+  font-family: var(--font-display);
+  color: var(--brand-ink);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Card */
+.card-soft {
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+  box-shadow: none;
+  transition: border-color 0.15s ease;
+}
+.card-soft:hover {
+  border-color: var(--brand-border);
+}
+
+/* Subtle divider — use as <div class="gold-divider"> */
+.gold-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0.75rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
