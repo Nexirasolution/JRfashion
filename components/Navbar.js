@@ -211,9 +211,9 @@ export default function Navbar() {
               </nav>
             </div>
 
-            {/* Center: logo */}
+            {/* Center: logo (medium) */}
             <Link href="/" className="flex items-center justify-self-center">
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24">
                 <Image src="/logo.png" alt="Tirupur Clothing Hub" fill className="object-contain" priority />
               </div>
             </Link>
@@ -292,17 +292,14 @@ export default function Navbar() {
           className="md:hidden fixed inset-0 z-[60] flex flex-col"
           style={{ background: PAPER }}
         >
-          {/* Overlay header: logo + close button, mirrors the main header height */}
+          {/* Overlay header: logo + close button */}
           <div
-            className="flex items-center justify-between px-6 py-4"
+            className="flex items-center justify-between px-6 py-3"
             style={{ borderBottom: `1px solid ${LINE}` }}
           >
-            {/* Center: logo */}
-<Link href="/" className="flex items-center justify-self-center">
-  <div className="relative w-16 h-16 sm:w-20 sm:h-20">
-    <Image src="/logo.png" alt="JR Fashion" fill className="object-contain" priority />
-  </div>
-</Link>
+            <div className="relative w-12 h-12">
+              <Image src="/logo.png" alt="Tirupur Clothing Hub" fill className="object-contain" />
+            </div>
             <button
               className="p-2 -mr-2"
               style={{ color: INK }}

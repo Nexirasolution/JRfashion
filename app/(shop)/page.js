@@ -149,7 +149,9 @@ export default async function HomePage() {
       )}
 
       {/* Intro / Featured collection — centered copy, up to 6 New Arrivals, CTA */}
-      <section className="max-w-6xl mx-auto px-4 pt-16 pb-16 text-center">
+      {/* Top padding reduced (was pt-16) and heading margin removed (was mt-14)
+          to close the big gap under Shop by Category. */}
+      <section className="max-w-6xl mx-auto px-4 pt-8 sm:pt-10 pb-16 text-center">
         {/* <h2
           className="text-2xl sm:text-3xl font-bold tracking-[1px]"
           style={{ color: INK, fontFamily: FONT_SANS }}
@@ -164,7 +166,7 @@ export default async function HomePage() {
         </p> */}
 
         <h3
-          className="mt-14 text-lg sm:text-xl font-bold tracking-[3px] uppercase"
+          className="text-lg sm:text-xl font-bold tracking-[3px] uppercase"
           style={{ color: INK, fontFamily: FONT_SANS }}
         >
           Featured Collection

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart } from 'lucide-react';
+import { Heart, ShoppingBag, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatINR } from '@/lib/utils';
 import { getVariantTotalStock } from '@/lib/stock';
@@ -25,11 +25,19 @@ const FONT_SANS = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 // Adjust these field names if your Product model calls them something else.
 const OPTION_FIELDS = ['sleeveOptions', 'zipOptions'];
 
-// Shared button styles (colors live in classes so hover states can override them)
-const BTN =
-  'flex-1 flex items-center justify-center h-9 px-3 rounded-full text-[12px] font-medium tracking-wide whitespace-nowrap transition-colors active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed';
-const BTN_OUTLINE = `${BTN} bg-white text-black border border-[#C9A227] hover:bg-[#F6EFD9] disabled:hover:bg-white`;
-const BTN_SOLID = `${BTN} bg-black text-[#C9A227] border border-[#C9A227] hover:bg-[#C9A227] hover:text-black disabled:hover:bg-black disabled:hover:text-[#C9A227]`;
+// ---------------------------------------------------------------------------
+// Action buttons
+// Mobile (< md):  [ 🛍 ] [        Buy now        ]   -> square cart icon + wide buy button
+// Desktop (md+):  [ 🛍 Add to cart ] [ Buy now ]     -> two equal buttons with labels
+// 44px tall on mobile for easy tapping, 40px on desktop.
+// ---------------------------------------------------------------------------
+const BTN_BASE =
+  'inline-flex items-center justify-center gap-1.5 h-11 md:h-10 rounded-md text-[12px] sm:text-[13px] font-medium tracking-wide whitespace-nowrap transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed';
+
+const BTN_CART = `${BTN_BASE} w-11 shrink-0 md:w-auto md:flex-1 md:px-3 bg-white text-black border border-[#C9A227] hover:bg-[#F6EFD9]`;
+const BTN_CART_ADDED = `${BTN_BASE} w-11 shrink-0 md:w-auto md:flex-1 md:px-3 bg-[#F6EFD9] text-black border border-[#C9A227]`;
+const BTN_BUY = `${BTN_BASE} flex-1 px-3 bg-black text-[#C9A227] border border-[#C9A227] hover:bg-[#C9A227] hover:text-black`;
+const BTN_FULL = `${BTN_BASE} w-full px-3 bg-black text-[#C9A227] border border-[#C9A227] hover:bg-[#C9A227] hover:text-black`;
 
 export default function ProductCard({ product }) {
   const router = useRouter();
@@ -53,7 +61,15 @@ export default function ProductCard({ product }) {
   const [selectedSize, setSelectedSize] = useState(() =>
     sizes.length === 1 && sizes[0].stock > 0 ? sizes[0].size : ''
   );
+  const [added, setAdded] = useState(false);
   const selectedStock = sizes.find((s) => s.size === selectedSize)?.stock ?? 0;
+
+  // Brief "Added" confirmation on the cart button
+  useEffect(() => {
+    if (!added) return;
+    const t = setTimeout(() => setAdded(false), 1600);
+    return () => clearTimeout(t);
+  }, [added]);
 
   const needsProductPage = OPTION_FIELDS.some((k) => product[k]?.length > 0) || !hasSizes;
 
@@ -94,6 +110,7 @@ export default function ProductCard({ product }) {
   function handleAddToCart() {
     if (!requireSize()) return;
     addItem(buildItem());
+    setAdded(true);
   }
 
   function handleBuyNow() {
@@ -218,27 +235,39 @@ export default function ProductCard({ product }) {
         </div>
       )}
 
-      {/* Actions — stacked on small screens, side by side from sm up */}
-      <div className="mt-3 flex flex-col sm:flex-row gap-2">
+      {/* Actions */}
+      <div className="mt-3 flex items-stretch gap-2">
         {outOfStock ? (
           <button
             type="button"
             disabled
-            className="flex-1 h-9 rounded-full text-[12px] font-medium tracking-wide cursor-not-allowed"
+            className={`${BTN_BASE} w-full`}
             style={{ background: LINE, color: INK_SOFT }}
           >
             Out of stock
           </button>
         ) : needsProductPage ? (
-          <Link href={href} className={BTN_SOLID}>
+          <Link href={href} className={BTN_FULL}>
             Choose options
           </Link>
         ) : (
           <>
-            <button type="button" onClick={handleAddToCart} className={BTN_OUTLINE}>
-              Add to cart
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className={added ? BTN_CART_ADDED : BTN_CART}
+              aria-label="Add to cart"
+              title="Add to cart"
+            >
+              {added ? (
+                <Check size={16} strokeWidth={2} />
+              ) : (
+                <ShoppingBag size={16} strokeWidth={1.5} />
+              )}
+              <span className="hidden md:inline">{added ? 'Added' : 'Add to cart'}</span>
             </button>
-            <button type="button" onClick={handleBuyNow} className={BTN_SOLID}>
+
+            <button type="button" onClick={handleBuyNow} className={BTN_BUY}>
               Buy now
             </button>
           </>
