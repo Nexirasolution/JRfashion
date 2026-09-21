@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { Plus, Trash2, X, Upload, Loader2, Pencil } from 'lucide-react';
 
 const emptyForm = {
-  title: '', subtitle: '', image: '', mobileImage: '', link: '',
+  title: '', subtitle: '', image: '', link: '',
   buttonText: 'Shop Now', sortOrder: 0, isActive: true,
 };
 
@@ -14,12 +14,9 @@ export default function AdminBannersPage() {
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadingMobile, setUploadingMobile] = useState(false);
   const [preview, setPreview] = useState('');
-  const [mobilePreview, setMobilePreview] = useState('');
   const [editingId, setEditingId] = useState(null);
   const fileRef = useRef();
-  const mobileFileRef = useRef();
 
   async function load() {
     const res = await fetch('/api/banners?all=true');
@@ -40,6 +37,7 @@ export default function AdminBannersPage() {
     try {
       const fd = new FormData();
       fd.append('file', file);
+      fd.append('folder', 'banners');
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
@@ -53,36 +51,10 @@ export default function AdminBannersPage() {
     }
   }
 
-  async function handleMobileFileChange(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // local preview instantly
-    setMobilePreview(URL.createObjectURL(file));
-
-    // upload to Cloudinary via our API route
-    setUploadingMobile(true);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
-      setForm((f) => ({ ...f, mobileImage: data.url }));
-      toast.success('Mobile image uploaded');
-    } catch (err) {
-      toast.error(err.message);
-      setMobilePreview('');
-    } finally {
-      setUploadingMobile(false);
-    }
-  }
-
   function openCreate() {
     setEditingId(null);
     setForm(emptyForm);
     setPreview('');
-    setMobilePreview('');
     setShowForm(true);
   }
 
@@ -92,14 +64,12 @@ export default function AdminBannersPage() {
       title: b.title || '',
       subtitle: b.subtitle || '',
       image: b.image || '',
-      mobileImage: b.mobileImage || '',
       link: b.link || '',
       buttonText: b.buttonText || 'Shop Now',
       sortOrder: b.sortOrder ?? 0,
       isActive: b.isActive ?? true,
     });
     setPreview(b.image || '');
-    setMobilePreview(b.mobileImage || '');
     setShowForm(true);
   }
 
@@ -131,7 +101,6 @@ export default function AdminBannersPage() {
     setEditingId(null);
     setForm(emptyForm);
     setPreview('');
-    setMobilePreview('');
   }
 
   async function toggleActive(b) {
@@ -165,15 +134,15 @@ export default function AdminBannersPage() {
             <button type="button" onClick={closeForm}><X size={18} /></button>
           </div>
 
-          {/* Desktop Image upload */}
+          {/* Single banner image (used on desktop AND mobile) */}
           <div>
-            <p className="text-xs font-medium text-brand-ink/60 mb-1">Desktop Image (required)</p>
+            <p className="text-xs font-medium text-brand-ink/60 mb-1">Banner Image (required)</p>
             <div
               onClick={() => !uploading && fileRef.current?.click()}
-              className="w-full h-36 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-brand-magenta transition-colors overflow-hidden relative"
+              className="w-full aspect-[1920/810] border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-brand-magenta transition-colors overflow-hidden relative"
             >
               {preview ? (
-                <img src={preview} alt="desktop preview" className="w-full h-full object-cover" />
+                <img src={preview} alt="banner preview" className="w-full h-full object-contain" />
               ) : (
                 <div className="flex flex-col items-center gap-1 text-brand-ink/40 text-sm">
                   <Upload size={24} />
@@ -187,46 +156,13 @@ export default function AdminBannersPage() {
               )}
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-            <p className="text-xs text-brand-ink/40 mt-1">Recommended: wide crop, ~2.4:1 ratio.</p>
-          </div>
 
-          {/* Mobile Image upload */}
-          <div>
-            <p className="text-xs font-medium text-brand-ink/60 mb-1">Mobile Image (optional — falls back to desktop image)</p>
-            <div
-              onClick={() => !uploadingMobile && mobileFileRef.current?.click()}
-              className="w-full h-48 max-w-[220px] border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-brand-magenta transition-colors overflow-hidden relative"
-            >
-              {mobilePreview ? (
-                <img src={mobilePreview} alt="mobile preview" className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center gap-1 text-brand-ink/40 text-sm">
-                  <Upload size={24} />
-                  <span>Click to choose image</span>
-                </div>
-              )}
-              {uploadingMobile && (
-                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                  <Loader2 size={24} className="animate-spin text-brand-magenta" />
-                </div>
-              )}
+            <div className="mt-2 rounded-lg bg-brand-ink/5 p-3 text-xs text-brand-ink/70 space-y-0.5">
+              <p><b>Size:</b> 1920 × 810 px (ratio ≈ 2.37 : 1)</p>
+              <p><b>Format:</b> JPG or WebP, under 300 KB for fast loading</p>
+              <p>The same image shows on desktop and mobile. On mobile the full image is shown (nothing is cropped), just smaller — so keep text large and bold.</p>
             </div>
-            <input ref={mobileFileRef} type="file" accept="image/*" className="hidden" onChange={handleMobileFileChange} />
-            <p className="text-xs text-brand-ink/40 mt-1">Recommended: portrait/near-square crop, ~4:5 ratio.</p>
-            {mobilePreview && (
-              <button
-                type="button"
-                onClick={() => { setMobilePreview(''); setForm((f) => ({ ...f, mobileImage: '' })); }}
-                className="text-xs text-brand-magenta mt-1"
-              >
-                Remove mobile image
-              </button>
-            )}
           </div>
-
-          {editingId && (
-            <p className="text-xs text-brand-ink/50">Click an image to replace it, or leave it as is.</p>
-          )}
 
           <input placeholder="Title" className="w-full border rounded-lg px-3 py-2 text-sm" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <input placeholder="Subtitle" className="w-full border rounded-lg px-3 py-2 text-sm" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
@@ -238,8 +174,8 @@ export default function AdminBannersPage() {
             <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} /> Active
           </label>
 
-          <button className="btn-primary text-sm" disabled={uploading || uploadingMobile}>
-            {uploading || uploadingMobile ? 'Uploading…' : editingId ? 'Save Changes' : 'Create'}
+          <button className="btn-primary text-sm" disabled={uploading}>
+            {uploading ? 'Uploading…' : editingId ? 'Save Changes' : 'Create'}
           </button>
         </form>
       )}
@@ -247,11 +183,8 @@ export default function AdminBannersPage() {
       <div className="grid sm:grid-cols-2 gap-4">
         {banners.map((b) => (
           <div key={b._id} className="card-soft overflow-hidden">
-            <div className="flex gap-1 h-32">
-              <img src={b.image} alt={b.title} className="flex-1 h-full object-cover" />
-              {b.mobileImage && (
-                <img src={b.mobileImage} alt={`${b.title} (mobile)`} className="w-16 h-full object-cover shrink-0" title="Mobile image" />
-              )}
+            <div className="w-full aspect-[1920/810] bg-white">
+              <img src={b.image} alt={b.title} className="w-full h-full object-contain" />
             </div>
             <div className="p-3 flex items-center justify-between">
               <div>
