@@ -23,7 +23,7 @@ async function getCategories() {
 export default async function Footer() {
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '919344430878';
   const instagram = process.env.NEXT_PUBLIC_INSTAGRAM ||
-    'https://www.instagram.com/tirupur_clothing_hub?utm_source=qr&igsi=ZTk1em9obGZtajMx';
+    'https://www.instagram.com/';
   const categories = await getCategories();
 
   const quickLinks = [
@@ -43,7 +43,7 @@ export default async function Footer() {
         {/* Brand column */}
         <div className="sm:col-span-4">
           <h3 className={`${display.className} text-2xl leading-tight`} style={{ color: INK, fontWeight: 400 }}>
-            Tirupur Clothing Hub
+            JR Fashion
           </h3>
           <p className="text-[11px] font-medium tracking-wide mb-4" style={{ color: INK }}>
             Wholesale &amp; Retail
@@ -69,7 +69,7 @@ export default async function Footer() {
       <div style={{ borderTop: `1px solid ${LINE}` }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-[11px]" style={{ color: INK_SOFT }}>
-            © {new Date().getFullYear()} Tirupur Clothing Hub. All rights reserved.
+            © {new Date().getFullYear()} JR Fashion. All rights reserved.
           </p>
 
           <a
