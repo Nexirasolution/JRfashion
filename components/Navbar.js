@@ -297,9 +297,12 @@ export default function Navbar() {
             className="flex items-center justify-between px-6 py-4"
             style={{ borderBottom: `1px solid ${LINE}` }}
           >
-            <div className="relative w-16 h-16">
-              <Image src="/logo.png" alt="Tirupur Clothing Hub" fill className="object-contain" />
-            </div>
+            {/* Center: logo */}
+<Link href="/" className="flex items-center justify-self-center">
+  <div className="relative w-16 h-16 sm:w-20 sm:h-20">
+    <Image src="/logo.png" alt="JR Fashion" fill className="object-contain" priority />
+  </div>
+</Link>
             <button
               className="p-2 -mr-2"
               style={{ color: INK }}
