@@ -310,6 +310,25 @@ export default function ProductPage() {
                 Share
               </button>
             </div>
+
+            {/* Product videos — shown below the gallery/thumbnails on both
+                mobile and desktop, since a try-on or drape clip is useful
+                regardless of screen size. */}
+            {product.videos?.length > 0 && (
+              <div className="mt-4 flex flex-col gap-3">
+                {product.videos.map((url, i) => (
+                  <video
+                    key={i}
+                    src={url}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full"
+                    style={{ borderRadius: '4px', background: GOLD_LIGHT }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ── Details ── */}

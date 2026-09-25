@@ -48,6 +48,12 @@ const ProductSchema = new mongoose.Schema(
     // falls back to this product's category.sizeChart instead.
     sizeChart: [{ type: String }],
 
+    // One or more optional product videos (e.g. a try-on or fabric-drape
+    // clip). Shown on the storefront PDP below the image gallery. Uploaded
+    // through the same /api/upload endpoint as images — Cloudinary's
+    // resource_type: 'auto' detects and stores it as a video asset.
+    videos: [{ type: String }],
+
     // Product-level (not per-variant) sleeve/zip options. Admin picks which
     // of these apply to this product; if a product has any sleeveOptions,
     // the customer must pick one on the PDP before adding to cart. Same

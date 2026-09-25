@@ -15,12 +15,6 @@ const GOLD = '#C9A227';
 const LINE = '#E8E8E8';
 const PAPER = '#FFFFFF';
 
-const SHOP_GROUPS = [
-  { key: 'bestseller', label: 'Best Sellers', qs: 'flag=bestseller' },
-  { key: 'topseller', label: 'Top Sellers', qs: 'flag=topseller' },
-  { key: 'newarrival', label: 'New Arrivals', qs: 'flag=newarrival' },
-];
-
 // Gold text is hard to read on white, so hover/active states use a gold
 // underline instead of a gold text color.
 function underlineOn(el) {
@@ -42,8 +36,8 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [mobileGroupOpen, setMobileGroupOpen] = useState(null);
-  const [mobileCatOpen, setMobileCatOpen] = useState(null); // `${groupKey}:${categoryId}` of the expanded subcategory list
+  const [mobileShopOpen, setMobileShopOpen] = useState(false);
+  const [mobileCatOpen, setMobileCatOpen] = useState(null); // category id of the expanded subcategory list
 
   const closeTimer = useRef(null);
 
@@ -95,13 +89,13 @@ export default function Navbar() {
     closeTimer.current = setTimeout(() => setShopOpen(false), 150);
   }
 
-  function categoryHref(slug, qs) {
-    return `/category/${slug}?${qs}`;
+  function categoryHref(slug) {
+    return `/category/${slug}`;
   }
 
   function closeMobileMenu() {
     setMenuOpen(false);
-    setMobileGroupOpen(null);
+    setMobileShopOpen(false);
     setMobileCatOpen(null);
   }
 
@@ -110,17 +104,17 @@ export default function Navbar() {
       <CouponMarquee />
 
       <header className="sticky top-0 z-50" style={{ background: PAPER, borderBottom: `1px solid ${LINE}` }}>
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6">
           <div className="grid grid-cols-3 items-center">
             {/* Left: mobile toggle + primary links */}
             <div className="flex items-center gap-1 justify-self-start">
               <button
-                className="md:hidden p-2 -ml-2"
+                className="md:hidden p-1.5 -ml-1 sm:p-2 sm:-ml-2"
                 style={{ color: INK }}
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="Menu"
               >
-                {menuOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
+                {menuOpen ? <X size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5" /> : <Menu size={18} strokeWidth={1.5} className="sm:w-5 sm:h-5" />}
               </button>
 
               <nav className="hidden md:flex items-center gap-8">
@@ -147,55 +141,45 @@ export default function Navbar() {
                   </button>
 
                   {shopOpen && categories.length > 0 && (
-                    <div className="absolute left-0 top-full pt-5" style={{ width: '620px' }}>
+                    <div className="absolute left-0 top-full pt-5" style={{ width: '560px' }}>
                       <div
                         style={{ background: PAPER, borderTop: `1px solid ${GOLD}` }}
-                        className="py-6 px-6 grid grid-cols-3 gap-8 max-h-[70vh] overflow-y-auto"
+                        className="py-6 px-6 max-h-[70vh] overflow-y-auto"
                       >
-                        {SHOP_GROUPS.map((group) => (
-                          <div key={group.key}>
-                            <div
-                              className="text-[11px] font-semibold tracking-[1.5px] uppercase mb-3 pb-2"
-                              style={{ color: INK, borderBottom: `1px solid ${LINE}` }}
-                            >
-                              {group.label}
-                            </div>
-                            <div className="flex flex-col gap-2.5">
-                              {categories.map((c) => (
-                                <div key={c._id}>
-                                  <Link
-                                    href={categoryHref(c.slug, group.qs)}
-                                    onClick={() => setShopOpen(false)}
-                                    className="py-0.5 text-[13px] font-medium tracking-wide transition-colors block w-fit"
-                                    style={{ color: INK }}
-                                    onMouseEnter={(e) => underlineOn(e.currentTarget)}
-                                    onMouseLeave={(e) => underlineOff(e.currentTarget)}
-                                  >
-                                    {c.name}
-                                  </Link>
+                        <div className="[column-count:3] gap-8">
+                          {categories.map((c) => (
+                            <div key={c._id} className="break-inside-avoid mb-6">
+                              <Link
+                                href={categoryHref(c.slug)}
+                                onClick={() => setShopOpen(false)}
+                                className="py-0.5 text-[13px] font-semibold tracking-wide transition-colors block w-fit"
+                                style={{ color: INK }}
+                                onMouseEnter={(e) => underlineOn(e.currentTarget)}
+                                onMouseLeave={(e) => underlineOff(e.currentTarget)}
+                              >
+                                {c.name}
+                              </Link>
 
-                                  {c.subcategories?.length > 0 && (
-                                    <div className="flex flex-col mt-1 pl-3" style={{ borderLeft: `1px solid ${LINE}` }}>
-                                      {c.subcategories.map((sub) => (
-                                        <Link
-                                          key={sub._id}
-                                          href={categoryHref(sub.slug, group.qs)}
-                                          onClick={() => setShopOpen(false)}
-                                          className="py-1 text-[12px] tracking-wide transition-colors"
-                                          style={{ color: INK_SOFT }}
-                                          onMouseEnter={(e) => (e.currentTarget.style.color = INK)}
-                                          onMouseLeave={(e) => (e.currentTarget.style.color = INK_SOFT)}
-                                        >
-                                          {sub.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  )}
+                              {c.subcategories?.length > 0 && (
+                                <div className="flex flex-col mt-1.5 pl-3" style={{ borderLeft: `1px solid ${LINE}` }}>
+                                  {c.subcategories.map((sub) => (
+                                    <Link
+                                      key={sub._id}
+                                      href={categoryHref(sub.slug)}
+                                      onClick={() => setShopOpen(false)}
+                                      className="py-1 text-[12px] tracking-wide transition-colors"
+                                      style={{ color: INK_SOFT }}
+                                      onMouseEnter={(e) => (e.currentTarget.style.color = INK)}
+                                      onMouseLeave={(e) => (e.currentTarget.style.color = INK_SOFT)}
+                                    >
+                                      {sub.name}
+                                    </Link>
+                                  ))}
                                 </div>
-                              ))}
+                              )}
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -211,51 +195,51 @@ export default function Navbar() {
               </nav>
             </div>
 
-            {/* Center: logo (medium) */}
+            {/* Center: logo (scales down on small screens) */}
             <Link href="/" className="flex items-center justify-self-center">
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+              <div className="relative w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24">
                 <Image src="/logo.png" alt="Tirupur Clothing Hub" fill className="object-contain" priority />
               </div>
             </Link>
 
-            {/* Right: search + wishlist + cart */}
-            <div className="flex items-center gap-2.5 justify-self-end">
-              <button
-                className="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
-                style={{ color: INK, border: `1px solid ${LINE}` }}
-                onClick={() => setSearchOpen((v) => !v)}
-                aria-label="Search"
-              >
-                <Search size={16} strokeWidth={1.5} />
-              </button>
-
-              {/* <Link
+            {/* Right: wishlist + search + cart */}
+            <div className="flex items-center gap-1 sm:gap-2.5 justify-self-end">
+              <Link
                 href="/wishlist"
-                className="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors"
+                className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-colors"
                 style={{ color: INK, border: `1px solid ${LINE}` }}
                 aria-label="Wishlist"
               >
-                <Heart size={16} strokeWidth={1.5} />
+                <Heart size={14} strokeWidth={1.5} className="sm:w-4 sm:h-4" />
                 {wishlistCount > 0 && (
                   <span
-                    className="absolute -top-1 -right-1 text-[9px] font-semibold rounded-full w-[16px] h-[16px] flex items-center justify-center"
+                    className="absolute -top-1 -right-1 text-[8px] sm:text-[9px] font-semibold rounded-full w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] flex items-center justify-center"
                     style={{ background: GOLD, color: INK }}
                   >
                     {wishlistCount > 9 ? '9+' : wishlistCount}
                   </span>
                 )}
-              </Link> */}
+              </Link>
+
+              <button
+                className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-colors"
+                style={{ color: INK, border: `1px solid ${LINE}` }}
+                onClick={() => setSearchOpen((v) => !v)}
+                aria-label="Search"
+              >
+                <Search size={14} strokeWidth={1.5} className="sm:w-4 sm:h-4" />
+              </button>
 
               <Link
                 href="/cart"
-                className="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors"
+                className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-colors"
                 style={{ color: INK, border: `1px solid ${LINE}` }}
                 aria-label="Cart"
               >
-                <ShoppingBag size={16} strokeWidth={1.5} />
+                <ShoppingBag size={14} strokeWidth={1.5} className="sm:w-4 sm:h-4" />
                 {count > 0 && (
                   <span
-                    className="absolute -top-1 -right-1 text-[9px] font-semibold rounded-full w-[16px] h-[16px] flex items-center justify-center"
+                    className="absolute -top-1 -right-1 text-[8px] sm:text-[9px] font-semibold rounded-full w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] flex items-center justify-center"
                     style={{ background: GOLD, color: INK }}
                   >
                     {count > 9 ? '9+' : count}
@@ -321,93 +305,79 @@ export default function Navbar() {
               Home
             </Link>
 
-            <div
-              className="py-3.5 text-[14px] tracking-[1.5px] uppercase"
-              style={{ color: INK, borderBottom: `1px solid ${LINE}` }}
-            >
-              Shop
-            </div>
-
-            {SHOP_GROUPS.map((group) => (
-              <div key={group.key} style={{ borderBottom: `1px solid ${LINE}` }}>
-                <button
-                  className="w-full flex items-center justify-between py-3 pl-3 text-[13px] tracking-wide uppercase"
+            <div style={{ borderBottom: `1px solid ${LINE}` }}>
+              <button
+                className="w-full flex items-center justify-between py-3.5 text-[14px] tracking-[1.5px] uppercase"
+                style={{ color: INK }}
+                onClick={() => setMobileShopOpen((v) => !v)}
+              >
+                Shop
+                <ChevronDown
+                  size={14}
+                  strokeWidth={1.5}
                   style={{
-                    color: mobileGroupOpen === group.key ? INK : INK_SOFT,
-                    // Gold marker on the open group; inset shadow so nothing shifts
-                    boxShadow: mobileGroupOpen === group.key ? `inset 2px 0 0 ${GOLD}` : 'none',
+                    transform: mobileShopOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 150ms ease',
                   }}
-                  onClick={() => setMobileGroupOpen((v) => (v === group.key ? null : group.key))}
-                >
-                  {group.label}
-                  <ChevronDown
-                    size={14}
-                    strokeWidth={1.5}
-                    style={{
-                      transform: mobileGroupOpen === group.key ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 150ms ease',
-                    }}
-                  />
-                </button>
+                />
+              </button>
 
-                {mobileGroupOpen === group.key && (
-                  <div className="flex flex-col pb-3">
-                    {categories.map((c) => {
-                      const catKey = `${group.key}:${c._id}`;
-                      const hasSubs = c.subcategories?.length > 0;
-                      const isCatOpen = mobileCatOpen === catKey;
-                      return (
-                        <div key={c._id} className="flex flex-col">
-                          <div className="flex items-center">
-                            <Link
-                              href={categoryHref(c.slug, group.qs)}
-                              onClick={closeMobileMenu}
-                              className="flex-1 py-2.5 pl-6 text-[13px] tracking-wide"
-                              style={{ color: INK_SOFT }}
+              {mobileShopOpen && (
+                <div className="flex flex-col pb-3">
+                  {categories.map((c) => {
+                    const hasSubs = c.subcategories?.length > 0;
+                    const isCatOpen = mobileCatOpen === c._id;
+                    return (
+                      <div key={c._id} className="flex flex-col">
+                        <div className="flex items-center">
+                          <Link
+                            href={categoryHref(c.slug)}
+                            onClick={closeMobileMenu}
+                            className="flex-1 py-2.5 pl-3 text-[13px] tracking-wide"
+                            style={{ color: INK_SOFT }}
+                          >
+                            {c.name}
+                          </Link>
+                          {hasSubs && (
+                            <button
+                              onClick={() => setMobileCatOpen((v) => (v === c._id ? null : c._id))}
+                              className="px-3 py-2.5"
+                              aria-label={`Toggle ${c.name} subcategories`}
                             >
-                              {c.name}
-                            </Link>
-                            {hasSubs && (
-                              <button
-                                onClick={() => setMobileCatOpen((v) => (v === catKey ? null : catKey))}
-                                className="px-3 py-2.5"
-                                aria-label={`Toggle ${c.name} subcategories`}
-                              >
-                                <ChevronDown
-                                  size={12}
-                                  strokeWidth={1.5}
-                                  style={{
-                                    color: INK_SOFT,
-                                    transform: isCatOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                                    transition: 'transform 150ms ease',
-                                  }}
-                                />
-                              </button>
-                            )}
-                          </div>
-
-                          {hasSubs && isCatOpen && (
-                            <div className="flex flex-col pb-1.5">
-                              {c.subcategories.map((sub) => (
-                                <Link
-                                  key={sub._id}
-                                  href={categoryHref(sub.slug, group.qs)}
-                                  onClick={closeMobileMenu}
-                                  className="py-2 pl-10 text-[12.5px] tracking-wide"
-                                  style={{ color: INK_SOFT }}
-                                >
-                                  {sub.name}
-                                </Link>
-                              ))}
-                            </div>
+                              <ChevronDown
+                                size={12}
+                                strokeWidth={1.5}
+                                style={{
+                                  color: INK_SOFT,
+                                  transform: isCatOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                  transition: 'transform 150ms ease',
+                                }}
+                              />
+                            </button>
                           )}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            ))}
+
+                        {hasSubs && isCatOpen && (
+                          <div className="flex flex-col pb-1.5">
+                            {c.subcategories.map((sub) => (
+                              <Link
+                                key={sub._id}
+                                href={categoryHref(sub.slug)}
+                                onClick={closeMobileMenu}
+                                className="py-2 pl-7 text-[12.5px] tracking-wide"
+                                style={{ color: INK_SOFT }}
+                              >
+                                {sub.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             <Link
               href="/orders"

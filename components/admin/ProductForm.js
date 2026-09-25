@@ -237,6 +237,29 @@ function AddonOptionsEditor({ title, options, onAdd, onUpdate, onRemove }) {
   );
 }
 
+// Video upload slot — mirrors ImageSlot's upload pattern but renders a
+// playable <video> thumbnail instead of an <img>, and accepts video/* files.
+function VideoSlot({ value, uploading, onRemove }) {
+  return (
+    <div className="relative overflow-hidden" style={{ borderRadius: '4px', border: `1px solid ${LINE}` }}>
+      <video src={value} className="w-full h-24 object-cover" muted playsInline controls />
+      {uploading && (
+        <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.7)' }}>
+          <Loader2 size={16} className="animate-spin" style={{ color: INK }} />
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.6)', color: PAPER }}
+      >
+        <X size={12} />
+      </button>
+    </div>
+  );
+}
+
 export default function ProductForm({ initial, productId }) {
   const router = useRouter();
   const [categories, setCategories] = useState([]);
@@ -245,6 +268,7 @@ export default function ProductForm({ initial, productId }) {
       name: '', slug: '', sku: '', description: '', category: '', fabric: '', tags: [],
       variants: [emptyVariant()],
       sizeChart: [],
+      videos: [],
       sleeveOptions: [],
       zipOptions: [],
       pantOptions: [],
@@ -255,6 +279,7 @@ export default function ProductForm({ initial, productId }) {
     return {
       ...base,
       sizeChart: normalizeSizeChart(base.sizeChart),
+      videos: base.videos || [],
       sleeveOptions: base.sleeveOptions || [],
       zipOptions: base.zipOptions || [],
       pantOptions: (base.pantOptions || []).map((o) => ({ ...o })),
@@ -263,7 +288,9 @@ export default function ProductForm({ initial, productId }) {
   });
   const [saving, setSaving] = useState(false);
   const [sizeChartUploading, setSizeChartUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
   const sizeChartFileRef = useRef();
+  const videoFileRef = useRef();
 
   useEffect(() => {
     fetch('/api/categories').then((r) => r.json()).then((d) => setCategories(d.categories || []));
@@ -387,6 +414,39 @@ export default function ProductForm({ initial, productId }) {
     setForm((f) => ({ ...f, sizeChart: (f.sizeChart || []).filter((_, i) => i !== idx) }));
   }
 
+  // Videos — supports multiple files, uploaded one at a time through the
+  // same /api/upload endpoint used for images. Cloudinary's
+  // resource_type: 'auto' detects the file as video and returns a
+  // playable secure_url.
+  async function handleVideoFilesChange(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setVideoUploading(true);
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        uploaded.push(data.url);
+      }
+      setForm((f) => ({ ...f, videos: [...(f.videos || []), ...uploaded] }));
+      toast.success(`${uploaded.length} video${uploaded.length > 1 ? 's' : ''} uploaded`);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setVideoUploading(false);
+      e.target.value = '';
+    }
+  }
+
+  function removeVideo(idx) {
+    setForm((f) => ({ ...f, videos: (f.videos || []).filter((_, i) => i !== idx) }));
+  }
+
   async function submit(e) {
     e.preventDefault();
     setSaving(true);
@@ -395,6 +455,7 @@ export default function ProductForm({ initial, productId }) {
     const payload = {
       ...form,
       sizeChart: form.sizeChart || [],
+      videos: form.videos || [],
       sleeveOptions: form.sleeveOptions || [],
       zipOptions: form.zipOptions || [],
       pantOptions: (form.pantOptions || [])
@@ -547,6 +608,33 @@ export default function ProductForm({ initial, productId }) {
               </button>
             </div>
             <input ref={sizeChartFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleSizeChartFilesChange} />
+          </div>
+
+          {/* Product videos — optional, shown on the storefront PDP below
+              the image gallery. Accepts any video file; upload goes through
+              the same /api/upload endpoint as images. */}
+          <div className="sm:col-span-2">
+            <label style={labelStyle}>
+              Product Videos <span style={{ fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>
+                (optional — shown below the image gallery on the product page)
+              </span>
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+              {(form.videos || []).map((url, idx) => (
+                <VideoSlot key={idx} value={url} uploading={false} onRemove={() => removeVideo(idx)} />
+              ))}
+              <button
+                type="button"
+                disabled={videoUploading}
+                onClick={() => videoFileRef.current?.click()}
+                className="h-24 flex flex-col items-center justify-center gap-1 disabled:opacity-50"
+                style={{ borderRadius: '4px', border: `1.5px dashed ${PEACH}`, background: PEACH_WASH, color: PEACH, cursor: 'pointer' }}
+              >
+                {videoUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                <span style={{ fontSize: '10px', fontFamily: 'sans-serif' }}>{videoUploading ? 'Uploading…' : 'Add video'}</span>
+              </button>
+            </div>
+            <input ref={videoFileRef} type="file" accept="video/*" multiple className="hidden" onChange={handleVideoFilesChange} />
           </div>
 
           {/* Sleeve/Zip options — product-level, not per-variant. Admin picks
