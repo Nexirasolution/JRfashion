@@ -199,7 +199,7 @@ export default function ProductCard({ product }) {
           )}
           {discountPct > 0 && (
             <span className="text-xs font-medium" style={{ color: INK }}>
-              {discountPct}% off
+             Save {discountPct}% 
             </span>
           )}
         </div>

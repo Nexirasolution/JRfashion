@@ -15,6 +15,11 @@ const GOLD = '#C9A227';
 const LINE = '#E8E8E8';
 const PAPER = '#FFFFFF';
 
+const ENQUIRY_LINKS = [
+  { label: 'Bulk Order Enquiry', href: '/bulk-enquiry' },
+  { label: 'Contact Us', href: '/contact' },
+];
+
 // Gold text is hard to read on white, so hover/active states use a gold
 // underline instead of a gold text color.
 function underlineOn(el) {
@@ -35,11 +40,14 @@ export default function Navbar() {
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileShopOpen, setMobileShopOpen] = useState(false);
+  const [mobileEnquiryOpen, setMobileEnquiryOpen] = useState(false);
   const [mobileCatOpen, setMobileCatOpen] = useState(null); // category id of the expanded subcategory list
 
   const closeTimer = useRef(null);
+  const enquiryTimer = useRef(null);
 
   const router = useRouter();
   const { count } = useCart();
@@ -89,6 +97,14 @@ export default function Navbar() {
     closeTimer.current = setTimeout(() => setShopOpen(false), 150);
   }
 
+  function openEnquiry() {
+    if (enquiryTimer.current) clearTimeout(enquiryTimer.current);
+    setEnquiryOpen(true);
+  }
+  function scheduleCloseEnquiry() {
+    enquiryTimer.current = setTimeout(() => setEnquiryOpen(false), 150);
+  }
+
   function categoryHref(slug) {
     return `/category/${slug}`;
   }
@@ -96,6 +112,7 @@ export default function Navbar() {
   function closeMobileMenu() {
     setMenuOpen(false);
     setMobileShopOpen(false);
+    setMobileEnquiryOpen(false);
     setMobileCatOpen(null);
   }
 
@@ -192,6 +209,45 @@ export default function Navbar() {
                 >
                   Orders
                 </Link>
+
+                {/* Enquiry dropdown */}
+                <div className="relative" onMouseEnter={openEnquiry} onMouseLeave={scheduleCloseEnquiry}>
+                  <button
+                    className="text-[13px] font-normal tracking-[1.5px] uppercase transition-colors"
+                    style={{
+                      color: INK,
+                      textDecoration: enquiryOpen ? 'underline' : 'none',
+                      textDecorationColor: GOLD,
+                      textDecorationThickness: '2px',
+                      textUnderlineOffset: '6px',
+                    }}
+                  >
+                    Enquiry
+                  </button>
+
+                  {enquiryOpen && (
+                    <div className="absolute left-0 top-full pt-5" style={{ width: '200px' }}>
+                      <div
+                        className="py-3 px-5 flex flex-col"
+                        style={{ background: PAPER, borderTop: `1px solid ${GOLD}`, boxShadow: '0 8px 20px rgba(0,0,0,0.06)' }}
+                      >
+                        {ENQUIRY_LINKS.map((l) => (
+                          <Link
+                            key={l.href}
+                            href={l.href}
+                            onClick={() => setEnquiryOpen(false)}
+                            className="py-2 text-[13px] tracking-wide transition-colors w-fit"
+                            style={{ color: INK }}
+                            onMouseEnter={(e) => underlineOn(e.currentTarget)}
+                            onMouseLeave={(e) => underlineOff(e.currentTarget)}
+                          >
+                            {l.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </nav>
             </div>
 
@@ -390,6 +446,41 @@ export default function Navbar() {
                 Orders
               </span>
             </Link>
+
+            {/* Enquiry accordion */}
+            <div style={{ borderBottom: `1px solid ${LINE}` }}>
+              <button
+                className="w-full flex items-center justify-between py-3.5 text-[14px] tracking-[1.5px] uppercase"
+                style={{ color: INK }}
+                onClick={() => setMobileEnquiryOpen((v) => !v)}
+              >
+                Enquiry
+                <ChevronDown
+                  size={14}
+                  strokeWidth={1.5}
+                  style={{
+                    transform: mobileEnquiryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 150ms ease',
+                  }}
+                />
+              </button>
+
+              {mobileEnquiryOpen && (
+                <div className="flex flex-col pb-3">
+                  {ENQUIRY_LINKS.map((l) => (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      onClick={closeMobileMenu}
+                      className="py-2.5 pl-3 text-[13px] tracking-wide"
+                      style={{ color: INK_SOFT }}
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <Link
               href="/wishlist"

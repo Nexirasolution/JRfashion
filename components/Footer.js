@@ -23,13 +23,14 @@ async function getCategories() {
 export default async function Footer() {
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP || '919344430878';
   const instagram = process.env.NEXT_PUBLIC_INSTAGRAM ||
-    'https://www.instagram.com/';
+    'https://www.instagram.com/jr_fashion.in01';
   const categories = await getCategories();
 
   const quickLinks = [
     { label: 'Home', href: '/' },
     { label: 'Shop', href: '/shop' },
     { label: 'Wishlist', href: '/wishlist' },
+    { label: 'Bulk Order Enquiry', href: '/bulk-enquiry' },
     { label: 'Contact', href: '/contact' },
   ];
 
