@@ -31,7 +31,7 @@ export default async function Footer() {
     { label: 'Shop', href: '/shop' },
     { label: 'Wishlist', href: '/wishlist' },
     { label: 'Bulk Order Enquiry', href: '/bulk-enquiry' },
-    { label: 'Contact', href: '/contact' },
+    // { label: 'Contact', href: '/contact' },
   ];
 
   return (
