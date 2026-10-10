@@ -205,7 +205,7 @@ export default function CheckoutPage() {
           key: orderData.keyId,
           amount: orderData.order.amount,
           currency: 'INR',
-          name: 'Tirupur Clothing Hub',
+          name: 'JR Fashion',
           order_id: orderData.order.id,
           prefill: { name: form.name, contact: form.phone, email: form.email },
           theme: { color: '#0A0A0A' },
